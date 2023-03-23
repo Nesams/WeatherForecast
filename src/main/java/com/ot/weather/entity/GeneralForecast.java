@@ -1,7 +1,10 @@
 package com.ot.weather.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.List;
 
 @Entity
 @Builder
@@ -41,7 +44,7 @@ public class GeneralForecast {
     @Column(name = "night_temp_max")
     private double nightTempMax;
 
-    @Column(name = "night_text")
+    @Column(name = "night_text", length = 1000)
     private String nightText;
 
     @Column(name = "day_phenomenon")
@@ -53,7 +56,7 @@ public class GeneralForecast {
     @Column(name = "day_temp_max")
     private double dayTempMax;
 
-    @Column(name = "day_text")
+    @Column(name = "day_text", length = 1000)
     private String dayText;
 
     @Column(name = "sea_overview")
@@ -61,4 +64,13 @@ public class GeneralForecast {
 
     @Column(name = "peipsi")
     private String peipsi;
+
+    @JsonManagedReference
+    @OneToMany(mappedBy = "generalForecast")
+    private List<Place> places;
+
+    @JsonManagedReference
+    @OneToMany(mappedBy = "generalForecast")
+    private List<Wind> wind;
+
 }

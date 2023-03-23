@@ -1,5 +1,6 @@
 package com.ot.weather.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,8 +16,9 @@ import java.util.List;
 @Table(name = "places")
 public class Place {
 
-    public Place(String name, String phenomenon, double tempMin, double tempMax) {
+    public Place(String name, String nightOrDay, String phenomenon, double tempMin, double tempMax) {
         this.name = name;
+        this.nightOrDay = nightOrDay;
         this.phenomenon = phenomenon;
         this.tempMin = tempMin;
         this.tempMax = tempMax;
@@ -29,6 +31,9 @@ public class Place {
     @Column(name = "name")
     private String name;
 
+    @Column(name = "night_or_day")
+    private String nightOrDay;
+
     @Column(name = "phenomenon")
     private String phenomenon;
 
@@ -38,7 +43,8 @@ public class Place {
     @Column(name = "temp_max")
     private double tempMax;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonBackReference
+    @ManyToOne
     @JoinColumn(name = "general_forecast_id")
     private GeneralForecast generalForecast;
 }

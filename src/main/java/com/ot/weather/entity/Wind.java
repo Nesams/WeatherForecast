@@ -1,5 +1,6 @@
 package com.ot.weather.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -14,8 +15,9 @@ import lombok.*;
 @Table(name = "wind")
 public class Wind {
 
-    public Wind(String name, String direction, double speedMin, double speedMax, String gust) {
+    public Wind(String name, String nightOrDay, String direction, double speedMin, double speedMax, String gust) {
         this.name = name;
+        this.nightOrDay = nightOrDay;
         this.direction = direction;
         this.speedMin = speedMin;
         this.speedMax = speedMax;
@@ -28,6 +30,9 @@ public class Wind {
 
     @Column(name = "name")
     private String name;
+
+    @Column(name = "night_or_day")
+    private String nightOrDay;
 
     @Column(name = "direction")
 
@@ -44,7 +49,8 @@ public class Wind {
     private String gust;
 
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonBackReference
+    @ManyToOne
     @JoinColumn(name = "general_forecast_id")
     private GeneralForecast generalForecast;
 }

@@ -29,6 +29,7 @@ dependencies {
 	runtimeOnly("com.h2database:h2")
 	implementation ("org.quartz-scheduler:quartz:2.3.2")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
 }
 
 tasks.withType<Test> {

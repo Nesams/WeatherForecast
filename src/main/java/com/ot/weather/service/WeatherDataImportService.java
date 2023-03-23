@@ -23,6 +23,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class WeatherDataImportService {
@@ -47,6 +49,8 @@ public class WeatherDataImportService {
             Document doc = db.parse(stream);
             doc.getDocumentElement().normalize();
             NodeList forecastList = doc.getElementsByTagName("forecast");
+            List<Place> placesToSave = new ArrayList<>();
+            List<Wind> windsToSave = new ArrayList<>();
             for (int i = 0; i < forecastList.getLength(); i++) {
                 Node forecastNode = forecastList.item(i);
 
@@ -68,40 +72,91 @@ public class WeatherDataImportService {
                             generalForecast.setNightTempMax(Integer.parseInt(night.getElementsByTagName("tempmax").item(0).getTextContent()));
                             generalForecast.setNightText(night.getElementsByTagName("text").item(0).getTextContent());
 
-                            weatherDataRepository.save(generalForecast);
-                        }
-                        NodeList windList = forecast.getElementsByTagName("wind");
-                        for (int l = 0; l < windList.getLength(); l++) {
-                            Element wind = (Element) windList.item(l);
-
-                            Wind windForecast = new Wind();
-                            windForecast.setDirection(wind.getElementsByTagName("direction").item(0).getTextContent());
-                            windForecast.setName(wind.getElementsByTagName("name").item(0).getTextContent());
-                            windForecast.setSpeedMin(Integer.parseInt(wind.getElementsByTagName("speedmin").item(0).getTextContent()));
-                            windForecast.setSpeedMax(Integer.parseInt(wind.getElementsByTagName("speedmax").item(0).getTextContent()));
-
-                            windDataRepository.save(windForecast);
-
-                        }
-                        NodeList placeList = forecast.getElementsByTagName("place");
+                        NodeList placeList = night.getElementsByTagName("place");
                         for (int k = 0; k < placeList.getLength(); k++) {
-                            Element place = (Element) placeList.item(k);
+                            Node placeNode = placeList.item(k);
+                            if (nightNode.getNodeType() == Node.ELEMENT_NODE) {
+                                Element place = (Element) placeList.item(k);
 
-                            Place placeForecast = new Place();
-                            placeForecast.setName(place.getElementsByTagName("name").item(0).getTextContent());
-                            placeForecast.setPhenomenon(place.getElementsByTagName("phenomenon").item(0).getTextContent());
-                            placeForecast.setTempMin(Integer.parseInt(place.getElementsByTagName("tempmin").item(0).getTextContent()));
+                                Place placeForecast = new Place();
+                                placeForecast.setName(place.getElementsByTagName("name").item(0).getTextContent());
+                                System.out.println(place.getElementsByTagName("name").item(0).getTextContent());
+                                placeForecast.setPhenomenon(place.getElementsByTagName("phenomenon").item(0).getTextContent());
+                                placeForecast.setTempMin(Integer.parseInt(place.getElementsByTagName("tempmin").item(0).getTextContent()));
+                                placeForecast.setNightOrDay("night");
+                                placeForecast.setGeneralForecast(generalForecast);
 
-                            placesDataRepository.save(placeForecast);
-
+                                placesToSave.add(placeForecast);
+                            }
                         }
+                            NodeList windList = night.getElementsByTagName("wind");
+                            for (int l = 0; l < windList.getLength(); l++) {
+                                Element wind = (Element) windList.item(l);
+                                Wind windForecast = new Wind();
+                                windForecast.setDirection(wind.getElementsByTagName("direction").item(0).getTextContent());
+                                windForecast.setName(wind.getElementsByTagName("name").item(0).getTextContent());
+                                windForecast.setSpeedMin(Integer.parseInt(wind.getElementsByTagName("speedmin").item(0).getTextContent()));
+                                windForecast.setSpeedMax(Integer.parseInt(wind.getElementsByTagName("speedmax").item(0).getTextContent()));
+                                windForecast.setGust(wind.getElementsByTagName("gust").item(0).getTextContent());
+                                windForecast.setNightOrDay("night");
+                                windForecast.setGeneralForecast(generalForecast);
+
+                                windsToSave.add(windForecast);
+
+                            }
                         }
-                }
                     }
+                    NodeList dayNodes = forecast.getElementsByTagName("day");
+                    for (int m = 0; m < dayNodes.getLength(); m++) {
+                        Node dayNode = dayNodes.item(m);
+                        if (dayNode.getNodeType() == Node.ELEMENT_NODE) {
+                            Element day = (Element) dayNode;
+                            generalForecast.setDayPhenomenon(day.getElementsByTagName("phenomenon").item(0).getTextContent());
+                            generalForecast.setDayTempMin(Integer.parseInt(day.getElementsByTagName("tempmin").item(0).getTextContent()));
+                            generalForecast.setDayTempMax(Integer.parseInt(day.getElementsByTagName("tempmax").item(0).getTextContent()));
+                            generalForecast.setDayText(day.getElementsByTagName("text").item(0).getTextContent());
 
+                            weatherDataRepository.save(generalForecast);
 
+                            NodeList placeList = day.getElementsByTagName("place");
+                            for (int n = 0; n < placeList.getLength(); n++) {
+                                Node placeNode = placeList.item(n);
+                                if (dayNode.getNodeType() == Node.ELEMENT_NODE) {
+                                    Element place = (Element) placeList.item(n);
+                                    Place placeForecast = new Place();
+                                    placeForecast.setName(place.getElementsByTagName("name").item(0).getTextContent());
+                                    System.out.println(place.getElementsByTagName("name").item(0).getTextContent());
+                                    placeForecast.setPhenomenon(place.getElementsByTagName("phenomenon").item(0).getTextContent());
+                                    placeForecast.setTempMax(Integer.parseInt(place.getElementsByTagName("tempmax").item(0).getTextContent()));
+                                    placeForecast.setNightOrDay("day");
+                                    placeForecast.setGeneralForecast(generalForecast);
 
+                                    placesToSave.add(placeForecast);
 
+                                    placesDataRepository.saveAll(placesToSave);
+                                }
+                            }
+                            NodeList windList = day.getElementsByTagName("wind");
+                            for (int o = 0; o < windList.getLength(); o++) {
+                                Element wind = (Element) windList.item(o);
+
+                                Wind windForecast = new Wind();
+                                windForecast.setDirection(wind.getElementsByTagName("direction").item(0).getTextContent());
+                                windForecast.setName(wind.getElementsByTagName("name").item(0).getTextContent());
+                                windForecast.setSpeedMin(Integer.parseInt(wind.getElementsByTagName("speedmin").item(0).getTextContent()));
+                                windForecast.setSpeedMax(Integer.parseInt(wind.getElementsByTagName("speedmax").item(0).getTextContent()));
+                                windForecast.setGust(wind.getElementsByTagName("gust").item(0).getTextContent());
+                                windForecast.setNightOrDay("day");
+
+                                windsToSave.add(windForecast);
+
+                                windDataRepository.saveAll(windsToSave);
+
+                            }
+                        }
+                    }
+                }
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

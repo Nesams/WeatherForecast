@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Weather App</title>
+</head>
+<body>
+<div id="app">
+    <h1>Weather App</h1>
+    <ul>
+        <li v-for="data in weatherData">
+            <p>ID: {{ data.id }}</p>
+            <p>Date: {{ data.date }}</p>
+            <p>Night Temperature Range: {{ data.nightTempMin }}°C - {{ data.nightTempMax }}°C</p>
+            <p>Night text: {{data.nightText}}</p>
+            <p>Night Phenomenon: {{ data.nightPhenomenon }}</p>
+            <p>Day Temperature Range: {{ data.dayTempMin }}°C - {{ data.dayTempMax }}°C</p>
+            <p>Day Phenomenon: {{ data.dayPhenomenon }}</p>
+            <p>Night text: {{data.dayText}}</p>
+            <hr>
+            <h4>Places:</h4>
+            <ul>
+                <li v-for="place in data.places">
+                    <p>Name: {{ place.name }}</p>
+                    <p>Night or Day: {{ place.nightOrDay }}</p>
+                    <p>Temperature Range: {{ place.tempMin }}°C - {{ place.tempMax }}°C</p>
+                    <p>Phenomenon: {{ place.phenomenon }}</p>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.21.1/babel.min.js"></script>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            weatherData: []
+        },
+        async getWeatherData() {
+            this.weatherData = await axios.get('/api/weather-forecast')
+                .then(response => response.data)
+                .catch(error => console.log(error));
+        }
+    });
+</script>
+</body>
+</html>
