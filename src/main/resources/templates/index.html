@@ -1,32 +1,146 @@
 <!DOCTYPE html>
-<html>
+<html xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="utf-8">
-    <title>Weather App</title>
+    <title>Weather Forecast</title>
+    <style>
+        body {
+            background-color: #777;
+            color: #ccc;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        #app {
+            background-color: #222;
+            color: #ccc;
+            margin: 30px auto;
+            max-width: 800px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: #fff;
+            margin-top: 0;
+        }
+
+        ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        li {
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+            background-color: #333;
+            position: relative;
+        }
+
+        li:hover {
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+            background-color: #444;
+        }
+
+        li::before {
+            content: "";
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 10px;
+            background-color: #333;
+            border-top-left-radius: 10px;
+            border-bottom-left-radius: 10px;
+        }
+
+        h2 {
+            margin: 0;
+            font-size: 36px;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        h3 {
+            margin-top: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #ccc;
+        }
+        h4 {
+            color: #fff;
+            margin-top: 20px;
+        }
+
+        p {
+            font-family: 'Open Sans', sans-serif;
+            line-height: 1.5;
+            margin: 5px 0;
+            padding: 5px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #ccc;
+            margin: 20px 0;
+        }
+    </style>
 </head>
 <body>
 <div id="app">
-    <h1>Weather App</h1>
+    <h1>Weather Forecast</h1>
     <ul>
         <li v-for="data in weatherData">
-            <p>ID: {{ data.id }}</p>
-            <p>Date: {{ data.date }}</p>
-            <p>Night Temperature Range: {{ data.nightTempMin }}°C - {{ data.nightTempMax }}°C</p>
-            <p>Night text: {{data.nightText}}</p>
-            <p>Night Phenomenon: {{ data.nightPhenomenon }}</p>
-            <p>Day Temperature Range: {{ data.dayTempMin }}°C - {{ data.dayTempMax }}°C</p>
-            <p>Day Phenomenon: {{ data.dayPhenomenon }}</p>
-            <p>Night text: {{data.dayText}}</p>
+            <h2>{{ data.date }}</h2>
+            <div style="display: flex; justify-content: space-between;">
+                <div style="width: 48%;">
+                    <h3>Night</h3>
+                    <p>Temperature Range: {{ data.nightTempMin }}°C - {{ data.nightTempMax }}°C</p>
+                    <p>{{ data.nightText }}</p>
+                    <p>Phenomenon: {{ data.nightPhenomenon }}</p>
+                </div>
+                <div style="width: 48%;">
+                    <h3>Day</h3>
+                    <p>Temperature Range: {{ data.dayTempMin }}°C - {{ data.dayTempMax }}°C</p>
+                    <p>{{ data.dayText }}</p>
+                    <p>Phenomenon: {{ data.dayPhenomenon }}</p>
+                </div>
+            </div>
             <hr>
-            <h4>Places:</h4>
-            <ul>
-                <li v-for="place in data.places">
-                    <p>Name: {{ place.name }}</p>
-                    <p>Night or Day: {{ place.nightOrDay }}</p>
-                    <p>Temperature Range: {{ place.tempMin }}°C - {{ place.tempMax }}°C</p>
-                    <p>Phenomenon: {{ place.phenomenon }}</p>
-                </li>
-            </ul>
+            <template v-if="data.wind.length > 0">
+                <h2>Wind</h2>
+                <ul>
+                    <li v-for="wind in data.wind">
+                        <h3>{{ wind.name }}</h3>
+                        <h4>Night</h4>
+                        <p>Speed at night: {{wind.night.speedMin}} - {{wind.night.speedMax}} km/h</p>
+                        <p> Direction: {{ wind.night.direction}}</p>
+                        <h4>Day</h4>
+                        <p>Speed during the day: {{wind.day.speedMin}} - {{wind.day.speedMax}} km/h</p>
+                        <p>Direction: {{ wind.day.direction }}</p>
+                    </li>
+                </ul>
+            </template>
+            <template v-if="data.places.length > 0">
+                <h2>Locations</h2>
+                <ul>
+                    <li v-for="place in data.places">
+                        <h3>{{ place.name }}</h3>
+                        <p>Temperature Range: {{ place.night.tempMin }}°C - {{ place.day.tempMax }}°C</p>
+                        <p v-if="place.night">Night Phenomenon: {{ place.night.phenomenon }}</p>
+                        <p v-if="place.day">Day Phenomenon: {{ place.day.phenomenon }}</p>
+                    </li>
+                </ul>
+            </template>
         </li>
     </ul>
 </div>
@@ -41,11 +155,48 @@
         data: {
             weatherData: []
         },
-        async getWeatherData() {
+        mounted: async function () {
             this.weatherData = await axios.get('/api/weather-forecast')
                 .then(response => response.data)
                 .catch(error => console.log(error));
-        }
+                console.log('Weather data:', this.weatherData);
+
+            this.weatherData.forEach(forecast => {
+                const places = forecast.places.reduce((acc, place) => {
+                    if (!acc[place.name]) {
+                        acc[place.name] = {
+                            name: place.name,
+                            night: null,
+                            day: null
+                        };
+                    }
+                    if (place.nightOrDay === 'night') {
+                        acc[place.name].night = place;
+                    } else if (place.nightOrDay === 'day') {
+                        acc[place.name].day = place;
+                    }
+                    return acc;
+                }, {});
+                forecast.places = Object.values(places);
+
+                const wind = forecast.wind.reduce((acc, wind) => {
+                    if (!acc[wind.name]) {
+                        acc[wind.name] = {
+                            name: wind.name,
+                            night: null,
+                            day: null
+                        };
+                    }
+                    if (wind.nightOrDay === 'night') {
+                        acc[wind.name].night = wind;
+                    } else if (wind.nightOrDay === 'day') {
+                        acc[wind.name].day = wind;
+                    }
+                    return acc;
+                }, {});
+                forecast.wind = Object.values(wind);
+            });
+        },
     });
 </script>
 </body>

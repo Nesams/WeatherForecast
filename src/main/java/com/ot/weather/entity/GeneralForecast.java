@@ -13,8 +13,9 @@ import java.util.List;
 @Setter @Getter @NoArgsConstructor
 public class GeneralForecast {
 
-    public GeneralForecast(String date, String nightPhenomenon, double nightTempMin, double nightTempMax, String nightText,
-                           String dayPhenomenon, double dayTempMin, double dayTempMax, String dayText, String seaOverView, String peipsi) {
+    public GeneralForecast(String date, String nightPhenomenon, double nightTempMin, double nightTempMax,
+                           String nightText, String dayPhenomenon, double dayTempMin, double dayTempMax, String dayText,
+                           String seaNightOverView, String seaDayOverView, String peipsiNight, String peipsiDay) {
         this.date = date;
         this.nightPhenomenon = nightPhenomenon;
         this.nightTempMin = nightTempMin;
@@ -24,8 +25,10 @@ public class GeneralForecast {
         this.dayTempMin = dayTempMin;
         this.dayTempMax = dayTempMax;
         this.dayText = dayText;
-        this.seaOverView = seaOverView;
-        this.peipsi = peipsi;
+        this.seaNightOverView = seaNightOverView;
+        this.seaDayOverView = seaDayOverView;
+        this.peipsiNight = peipsiNight;
+        this.peipsiDay = peipsiDay;
     }
 
     @Id
@@ -59,11 +62,17 @@ public class GeneralForecast {
     @Column(name = "day_text", length = 1000)
     private String dayText;
 
-    @Column(name = "sea_overview")
-    private String seaOverView;
+    @Column(name = "sea_night_overview", length = 10000)
+    private String seaNightOverView;
 
-    @Column(name = "peipsi")
-    private String peipsi;
+    @Column(name = "sea_day_overview", length = 10000)
+    private String seaDayOverView;
+
+    @Column(name = "peipsiNigth", length = 10000)
+    private String peipsiNight;
+
+    @Column(name = "peipsiDay", length = 10000)
+    private String peipsiDay;
 
     @JsonManagedReference
     @OneToMany(mappedBy = "generalForecast")
@@ -73,4 +82,35 @@ public class GeneralForecast {
     @OneToMany(mappedBy = "generalForecast")
     private List<Wind> wind;
 
+    public void setPhenomenon(String timePeriod, String phenomenon) {
+        if (timePeriod.equals("night")) {
+            this.nightPhenomenon = phenomenon;
+        } else if (timePeriod.equals("day")) {
+            this.dayPhenomenon = phenomenon;
+        }
+    }
+
+    public void setText(String timePeriod, String text) {
+        if (timePeriod.equals("night")) {
+            this.nightText = text;
+        } else if (timePeriod.equals("day")) {
+            this.dayText = text;
+        }
+    }
+
+    public void setTempMin(String timePeriod, int tempmin) {
+        if (timePeriod.equals("night")) {
+            this.nightTempMin = tempmin;
+        } else if (timePeriod.equals("day")) {
+            this.dayTempMin = tempmin;
+        }
+    }
+
+    public void setTempMax(String timePeriod, int tempmax) {
+        if (timePeriod.equals("night")) {
+            this.nightTempMax = tempmax;
+        } else if (timePeriod.equals("day")) {
+            this.dayTempMax = tempmax;
+        }
+    }
 }
