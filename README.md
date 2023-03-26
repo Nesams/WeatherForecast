@@ -24,7 +24,7 @@ The SpringBoot-Gradle-H2-Vue Weather Forecast Application is a web-based single-
 * The background job that runs once an hour to calculate the average minimum and maximum temperature across all locations in Estonia for the current date will run automatically.
 
 
-##Code Structure:
+## Code Structure:
 
 * The controller package contains the WeatherForecastController class, which handles incoming HTTP requests.
 * The entity package contains the GeneralForecast, Place, and Wind entities, which are used to represent data retrieved from the weather API.
